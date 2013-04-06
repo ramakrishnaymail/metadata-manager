@@ -1,0 +1,138 @@
+<apex:page controller="GNE_Generate_Package_XML" sidebar="false" showHeader="false">
+    <apex:sectionHeader title="Select Metadata components to Lock. So any other developer modifies it, it will send email: "/>
+
+<apex:pageMessages />      
+       
+    <apex:form >
+    
+    Changes done in last number of Days &nbsp;&nbsp; <apex:inputText value="{!lastNumberOfDays}"/> &nbsp;&nbsp; <br/>
+    Name Contains 1:  <apex:inputText value="{!containsString1 }"/> &nbsp;&nbsp; OR<br/>
+    Name Contains 2:  <apex:inputText value="{!containsString2 }"/> <br/>
+    
+   
+    <apex:commandButton action="{!updateMetadata}" value="Update Metadata"/>
+    <br/><br/>
+
+        <apex:commandButton action="{!selectAll}" value="Select All Components"/>
+
+   <br/><br/>
+
+    
+    <!--  {!today} -->
+    <apex:pageBlock title="Visualforce Pages changed" id="pages">
+        <apex:pageblockTable value="{!pages}" var="page" >
+           <apex:column > 
+                <apex:inputCheckbox value="{!page.isSelected}"/>           
+           </apex:column> 
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!page.aPage.Id}" target="_blank"> <apex:outputText value="{!page.aPage.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!page.aPage.LastModifiedDate}"/> 
+           <apex:column value="{!page.aPage.LastModifiedById}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+    <apex:pageBlock title="Apex Classes changed" id="classes">
+        <apex:pageblockTable value="{!classes}" var="class" >
+          <apex:column >
+              <apex:inputCheckbox value="{!class.isSelected}"/>           
+           </apex:column> 
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!class.aClass.Id}" target="_blank"> <apex:outputText value="{!class.aClass.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!class.aClass.LastModifiedDate}"/> 
+           <apex:column value="{!class.aClass.LastModifiedById}"/> 
+           <apex:column value="{!class.aClass.LengthWithoutComments}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+    <apex:pageBlock title="Apex Triggers changed" id="triggers">
+        <apex:pageblockTable value="{!triggers}" var="trigger" >
+          <apex:column >
+              <apex:inputCheckbox value="{!trigger.isSelected}"/>           
+           </apex:column> 
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!trigger.aTrigger.Id}" target="_blank"> <apex:outputText value="{!trigger.aTrigger.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!trigger.aTrigger.LastModifiedDate}"/> 
+           <apex:column value="{!trigger.aTrigger.LastModifiedById}"/> 
+           <apex:column value="{!trigger.aTrigger.LengthWithoutComments}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+
+    <apex:pageBlock title="Static Resources changed" id="staticResources">
+        <apex:pageblockTable value="{!staticResources}" var="staticResource" >
+          <apex:column >
+              <apex:inputCheckbox value="{!staticResource.isSelected}"/>           
+           </apex:column> 
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!staticResource.astaticResource.Id}" target="_blank"> <apex:outputText value="{!staticResource.astaticResource.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!staticResource.astaticResource.LastModifiedDate}"/> 
+           <apex:column value="{!staticResource.astaticResource.LastModifiedById}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+    <br/><br/>
+    
+      <b> Select admins who want to lock the resources on their name: </b> <br/>
+        <apex:panelGrid columns="3" id="abcd">
+            <apex:selectList id="sel1" value="{!leftselected}" multiselect="true" style="width:200px" size="8">
+                <apex:selectOptions value="{!unselectedvalues}" />
+            </apex:selectList>
+                <apex:panelGroup >
+                    <br/>
+                    <apex:image value="http://gene.force.com/PracticeRegistration/img/arrow2_picklist_right.gif">
+                        <apex:actionSupport event="onclick" action="{!selectclick}" reRender="abcd"/>
+                    </apex:image>
+                    <br/><br/>
+                    <apex:image value="http://gene.force.com/PracticeRegistration/img/arrow2_picklist_left.gif">
+                        <apex:actionSupport event="onclick" action="{!unselectclick}" reRender="abcd"/>
+                    </apex:image>
+                </apex:panelGroup>
+            <apex:selectList id="sel2" value="{!rightselected}" multiselect="true" style="width:200px" size="8">
+                <apex:selectOptions value="{!SelectedValues}" />
+            </apex:selectList>
+        </apex:panelGrid>
+<br/>
+   
+  <b> Select Track: </b> <br/>
+      <apex:selectList id="countries" value="{!selectedTrack}"
+         size="1" required="true">
+  <apex:selectOptions value="{!tracks}"/>
+</apex:selectList>   &nbsp;  &nbsp; If Other, Please specify <apex:inputText value="{!otherTrack}" />
+ <br/> <br/>
+        <apex:commandButton action="{!lockSelectdComponents}" value="Lock selected code"/>
+        
+      <br/><br/> 
+
+         <br/><br/>
+      
+    
+  
+    </apex:form>
+
+
+      
+       <apex:pageBlock id="paginationControl" >
+         <apex:pageBlockSection columns="1">
+                <apex:pageBlockTable value="{!codeConflicts}" var="cc">
+                    <apex:column >
+                        <apex:facet name="header">Code Conflict Number</apex:facet>
+                        <a href="/{!cc.Id}" target="_blank"> <apex:outputText value="{!cc.Name}"/> </a>
+                    </apex:column>                
+                    <apex:column value="{!cc.Code_Name__c}"/>
+                    <apex:column value="{!cc.Code_Type__c}"/>                                        
+                    <apex:column value="{!cc.Track__c}"/>
+                    <apex:column value="{!cc.Locked__c}"/>
+                    <apex:column value="{!cc.Locked_By__c}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>     
+         </apex:pageBlock>
+           
+
+</apex:page>

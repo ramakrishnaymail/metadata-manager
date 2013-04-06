@@ -1,0 +1,54 @@
+<apex:page controller="GNE_TodayChanges" sidebar="false" showHeader="false">
+    <apex:sectionHeader title="Metadata components changed by Developers today on Dev"/>
+    <!--  {!today} -->
+    <apex:pageBlock title="Visualforce Pages changed today" id="pages">
+        <apex:pageblockTable value="{!pages}" var="page" >
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!page.Id}" target="_blank"> <apex:outputText value="{!page.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!page.LastModifiedDate}"/> 
+           <apex:column value="{!page.LastModifiedById}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+    <apex:pageBlock title="Apex Classes changed today" id="classes">
+        <apex:pageblockTable value="{!classes}" var="class" >
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!class.Id}" target="_blank"> <apex:outputText value="{!class.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!class.LastModifiedDate}"/> 
+           <apex:column value="{!class.LastModifiedById}"/> 
+           <apex:column value="{!class.LengthWithoutComments}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+    <apex:pageBlock title="Apex Triggers changed today" id="triggers">
+        <apex:pageblockTable value="{!triggers}" var="trigger" >
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!trigger.Id}" target="_blank"> <apex:outputText value="{!trigger.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!trigger.LastModifiedDate}"/> 
+           <apex:column value="{!trigger.LastModifiedById}"/> 
+           <apex:column value="{!trigger.LengthWithoutComments}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+
+    <apex:pageBlock title="Static Resources changed today" id="staticResources">
+        <apex:pageblockTable value="{!aStaticResources}" var="staticResource" >
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!staticResource.Id}" target="_blank"> <apex:outputText value="{!staticResource.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!staticResource.LastModifiedDate}"/> 
+           <apex:column value="{!staticResource.LastModifiedById}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+    <br/><br/>
+    
+
+</apex:page>

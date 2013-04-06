@@ -1,0 +1,256 @@
+<apex:page controller="GNE_Generate_Package_XML" sidebar="false" showHeader="false">
+    <apex:sectionHeader title="'Package XML Generator'. Select Metadata components changed by Developers: "/>
+     
+       
+    <apex:form >
+    
+    Changes done in last number of Days &nbsp;&nbsp; <apex:inputText value="{!lastNumberOfDays}"/> &nbsp;&nbsp; <br/>
+    Name Contains 1:  <apex:inputText value="{!containsString1 }"/> &nbsp;&nbsp; OR<br/>
+    Name Contains 2:  <apex:inputText value="{!containsString2 }"/> <br/>
+    
+   
+    <apex:commandButton action="{!updateMetadata}" value="Update Metadata"/>
+    <br/><br/>
+        <apex:commandButton action="{!selectAll}" value="Select All Components"/>
+
+   <br/><br/>
+
+    
+    <!--  {!today} -->
+    <apex:pageBlock title="Visualforce Pages changed" id="pages">
+        <apex:pageblockTable value="{!pages}" var="page" >
+           <apex:column > 
+                <apex:inputCheckbox value="{!page.isSelected}"/>           
+           </apex:column> 
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!page.aPage.Id}" target="_blank"> <apex:outputText value="{!page.aPage.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!page.aPage.LastModifiedDate}"/> 
+           <apex:column value="{!page.aPage.LastModifiedById}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+    <apex:pageBlock title="Apex Classes changed" id="classes">
+        <apex:pageblockTable value="{!classes}" var="class" >
+          <apex:column >
+              <apex:inputCheckbox value="{!class.isSelected}"/>           
+           </apex:column> 
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!class.aClass.Id}" target="_blank"> <apex:outputText value="{!class.aClass.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!class.aClass.LastModifiedDate}"/> 
+           <apex:column value="{!class.aClass.LastModifiedById}"/> 
+           <apex:column value="{!class.aClass.LengthWithoutComments}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+    <apex:pageBlock title="Apex Triggers changed" id="triggers">
+        <apex:pageblockTable value="{!triggers}" var="trigger" >
+          <apex:column >
+              <apex:inputCheckbox value="{!trigger.isSelected}"/>           
+           </apex:column> 
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!trigger.aTrigger.Id}" target="_blank"> <apex:outputText value="{!trigger.aTrigger.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!trigger.aTrigger.LastModifiedDate}"/> 
+           <apex:column value="{!trigger.aTrigger.LastModifiedById}"/> 
+           <apex:column value="{!trigger.aTrigger.LengthWithoutComments}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+
+
+    <apex:pageBlock title="Static Resources changed" id="staticResources">
+        <apex:pageblockTable value="{!staticResources}" var="staticResource" >
+          <apex:column >
+              <apex:inputCheckbox value="{!staticResource.isSelected}"/>           
+           </apex:column> 
+           <apex:column >
+                        <apex:facet name="header">Name</apex:facet>
+                        <a href="/{!staticResource.astaticResource.Id}" target="_blank"> <apex:outputText value="{!staticResource.astaticResource.name}"/> </a>
+           </apex:column>
+           <apex:column value="{!staticResource.astaticResource.LastModifiedDate}"/> 
+           <apex:column value="{!staticResource.astaticResource.LastModifiedById}"/> 
+        </apex:pageblockTable>
+    </apex:pageBlock>    
+    <br/><br/>
+    
+
+
+ Select Object and click Add Object : &nbsp;&nbsp;
+     <apex:SelectList value="{!val}" size="1">
+      <apex:selectOptions value="{!Name}"></apex:selectOptions>
+    </apex:SelectList>
+   
+   &nbsp;&nbsp;
+<apex:commandButton action="{!addSelectedObject}" value="Add Object"/>
+      <br/><br/>
+      
+
+<b>Selected Objects: </b><br/> <br/> 
+
+   <apex:repeat value="{!objectNames}" var="on">
+      <apex:outputText value="{!on.aObject }" /><br/>  
+   </apex:repeat>
+<br/> <br/> 
+
+
+
+Select Object First and click Load Fields: &nbsp;&nbsp;
+     <apex:SelectList value="{!objectValForField}" size="1">
+      <apex:selectOptions value="{!Name}"></apex:selectOptions>
+    </apex:SelectList>
+    
+    
+<apex:commandButton action="{!loadFields}" value="Load Fields"/>  <br/>
+
+   Select Field Next and click Add Field: &nbsp;&nbsp;
+ <apex:SelectList value="{!fieldVal}" size="1">
+      <apex:selectOptions value="{!selectedObjectsFieldNames}"></apex:selectOptions>
+    </apex:SelectList>
+    
+   &nbsp;&nbsp;
+    <apex:commandButton action="{!addSelectedField}" value="Add Field"/>
+      <br/><br/>
+      
+
+<b>Selected Fields: </b><br/> <br/> 
+
+   <apex:repeat value="{!fieldNames}" var="on">
+      <apex:outputText value="{!on.aField }" /><br/>  
+   </apex:repeat>
+<br/> <br/>
+      
+        <apex:commandButton action="{!generatePackageXML}" value="Generate Package XML"/>
+        
+  
+  <apex:outputPanel layout="block">
+  <br/><br/>
+
+    <apex:outputText value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;" escape="false"/>
+    <br/>
+    <apex:outputText value="&lt;Package xmlns=&quot;http://soap.sforce.com/2006/04/metadata&quot;&gt;" escape="false"/>
+    <br/><br/>
+    
+    <!-- Pages -->
+    &nbsp;&nbsp;<apex:outputText value="&lt;types&gt;" escape="false"/>
+    <br/>  
+    <apex:repeat value="{!selPages}" var="selPage" >
+       &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;members&gt;" escape="false"/>
+        <apex:outputText value="{!selPage.Name}" />
+       <apex:outputText value="&lt;/members&gt;" escape="false"/>
+       <br/> 
+    </apex:repeat>
+   
+    &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;name&gt;" escape="false"/>ApexPage
+    <apex:outputText value="&lt;/name&gt;" escape="false"/>
+    <br/>
+    &nbsp;&nbsp;<apex:outputText value="&lt;/types&gt;" escape="false"/>
+    <br/> <br/>
+
+
+    <!-- Classes -->
+    &nbsp;&nbsp;<apex:outputText value="&lt;types&gt;" escape="false"/>
+    <br/>  
+    <apex:repeat value="{!selClasses}" var="selClass" >
+       &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;members&gt;" escape="false"/>
+        <apex:outputText value="{!selClass.Name}" />
+       <apex:outputText value="&lt;/members&gt;" escape="false"/>
+       <br/> 
+    </apex:repeat>
+   
+    &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;name&gt;" escape="false"/>ApexClass
+    <apex:outputText value="&lt;/name&gt;" escape="false"/>
+    <br/>
+    &nbsp;&nbsp;<apex:outputText value="&lt;/types&gt;" escape="false"/>
+    <br/> <br/>
+
+
+    <!-- Triggers -->
+    &nbsp;&nbsp;<apex:outputText value="&lt;types&gt;" escape="false"/>
+    <br/>  
+    <apex:repeat value="{!selTriggers}" var="selTrigger" >
+       &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;members&gt;" escape="false"/>
+        <apex:outputText value="{!selTrigger.Name}" />
+       <apex:outputText value="&lt;/members&gt;" escape="false"/>
+       <br/> 
+    </apex:repeat>
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;name&gt;" escape="false"/>ApexTrigger
+    <apex:outputText value="&lt;/name&gt;" escape="false"/>
+    <br/>
+    &nbsp;&nbsp;<apex:outputText value="&lt;/types&gt;" escape="false"/><br/><br/>
+
+
+    <!-- Objects -->
+    &nbsp;&nbsp;<apex:outputText value="&lt;types&gt;" escape="false"/>
+    <br/>  
+    <apex:repeat value="{!objectNames}" var="on" >
+       &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;members&gt;" escape="false"/>
+        <apex:outputText value="{!on.aObject}" />
+       <apex:outputText value="&lt;/members&gt;" escape="false"/>
+       <br/> 
+    </apex:repeat>
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;name&gt;" escape="false"/>CustomObject
+    <apex:outputText value="&lt;/name&gt;" escape="false"/>
+    <br/>
+     &nbsp;&nbsp;<apex:outputText value="&lt;/types&gt;" escape="false"/><br/><br/>
+
+    
+    <!-- Fields -->
+    
+        &nbsp;&nbsp;<apex:outputText value="&lt;types&gt;" escape="false"/>
+        <br/>  
+        <apex:repeat value="{!fieldNames}" var="on" >
+           &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;members&gt;" escape="false"/>
+            <apex:outputText value="{!on.aField}" />
+           <apex:outputText value="&lt;/members&gt;" escape="false"/>
+           <br/> 
+        </apex:repeat>
+     
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;name&gt;" escape="false"/>CustomField
+    <apex:outputText value="&lt;/name&gt;" escape="false"/>
+    <br/>
+    &nbsp;&nbsp;<apex:outputText value="&lt;/types&gt;" escape="false"/>
+    <br/>    
+    
+    
+    <!-- Static Resources-->
+    &nbsp;&nbsp;<apex:outputText value="&lt;types&gt;" escape="false"/>
+    <br/>  
+    <apex:repeat value="{!selStaticResources}" var="on" >
+       &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;members&gt;" escape="false"/>
+        <apex:outputText value="{!on.Name}" />
+       <apex:outputText value="&lt;/members&gt;" escape="false"/>
+       <br/> 
+    </apex:repeat>
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;name&gt;" escape="false"/>StaticResource
+    <apex:outputText value="&lt;/name&gt;" escape="false"/>
+    <br/>
+    &nbsp;&nbsp;<apex:outputText value="&lt;/types&gt;" escape="false"/>
+    <br/>     
+
+    <!-- Version -->
+
+    <br/>
+     &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputText value="&lt;version&gt;" escape="false"/>25.0
+    <apex:outputText value="&lt;/version&gt;" escape="false"/>
+    <br/>
+    
+   
+  &nbsp;&nbsp;<apex:outputText value="&lt;/Package&gt;" escape="false"/>
+
+
+    <br/><br/><br/><br/>
+    
+   </apex:outputPanel>     
+  
+    </apex:form>
+
+</apex:page>
+                   
